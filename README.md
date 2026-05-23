@@ -10,8 +10,41 @@ Takes a YOLO dataset with bounding box labels and outputs polygon-based segmenta
 1. Load each image and its YOLO bounding box labels
 2. Feed each bounding box to SAM as a prompt
 3. SAM returns a segmentation mask for the detected object
-4. The mask is traced to a polygon and simplified using the Douglas-Peucker algorithm
+4. The mask is traced to a polygon and simplified using the [Douglas-Peucker algorithm](https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm)
 5. Output is written as normalized YOLO polygon labels (`.txt`)
+
+## Motivation: Roboflow Auto Label — locally
+
+This pipeline replicates what [Roboflow Auto Label](https://roboflow.com/annotate/auto-label) does as a paid cloud feature — completely free and on your own machine. Roboflow's Auto Label uses SAM under the hood: it accepts a bounding box as a spatial prompt, generates a segmentation mask, and exports the result as a polygon annotation. `auto_segment` follows the exact same approach.
+
+| Step | Roboflow Auto Label | `auto_segment` |
+|---|---|---|
+| Input | Bounding box annotation | YOLO `.txt` bbox file |
+| Foundation model | SAM / Grounding DINO | SAM (`vit_b` or `vit_h`) |
+| Prompt strategy | Box prompt to SAM | `predictor.predict(box=...)` |
+| Output format | Polygon (YOLO / COCO) | YOLO segmentation polygon |
+| Fallback | Manual review queue | Keeps original bbox line |
+| Cost | ~$0.01–0.02 / image | Free, runs locally |
+
+The key quality gates — minimum mask area, minimum contour point count, and polygon simplification via Douglas-Peucker — are the same mechanisms Roboflow applies to keep auto-generated labels clean and lightweight.
+
+## Use in lips_ws (Locobot)
+
+The segmentation labels produced here are used to train a YOLOv8-seg model deployed on a [Locobot](https://www.trossenrobotics.com/locobot-ros-autonomous-mobile-research-robot) in the [`lips_ws`](https://github.com/anramz29/lips_ws) ROS1 workspace. The full data-to-robot pipeline is:
+
+```
+Roboflow (bbox labels)
+        ↓
+  auto_segment  ← this repo
+        ↓
+  YOLOv8-seg training
+        ↓
+  yolo_node.py on Locobot
+        ↓
+  Live instance segmentation on robot camera feed
+```
+
+Inside `lips_ws`, the `yolo_vision` package loads the trained model and subscribes to the robot's camera topic. Upgrading from bounding boxes to segmentation masks gives downstream nodes — `distance_node`, `object_mapper_node`, and `search_and_approach_node` — a tighter object footprint to work with, improving depth-based distance estimation and map localization.
 
 If SAM fails to produce a valid mask for an object, the original bounding box line is kept as a fallback.
 
