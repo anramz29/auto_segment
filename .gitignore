@@ -1,0 +1,10 @@
+# SAM model weights (too large for GitHub — downloaded automatically at runtime)
+*.pth
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

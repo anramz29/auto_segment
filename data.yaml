@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 2
+names: ['box', 'grasshopper']
+
+roboflow:
+  workspace: adrain
+  project: grasshopper_detection-u7gpw
+  version: 1
+  license: Private
+  url: https://app.roboflow.com/adrain/grasshopper_detection-u7gpw/1
