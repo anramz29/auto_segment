@@ -96,7 +96,7 @@ Converted labels are saved to `OUTPUT_DIR`. For the first 3 images, a debug visu
 
 ## Examples
 
-Debug visualizations are saved for the first 3 images processed. Green = original bounding box, red = SAM-generated segmentation polygon.
+Debug visualizations are saved for the first 3 images processed. Green = original bounding box, red = SAM-generated segmentation polygon. The targets are small plastic grasshopper and cricket toy figures — both green and similarly shaped, making them a good robustness test for the segmentation pipeline.
 
 ![img_315_debug](readme_images/img_315_debug.jpg)
 ![img_329_debug](readme_images/img_329_debug.jpg)
