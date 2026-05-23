@@ -1,6 +1,6 @@
 # auto_segment
 
-Automatically converts YOLO bounding box annotations to instance segmentation masks using Meta's [Segment Anything Model (SAM)](https://github.com/facebookresearch/segment-anything). Designed to run in Google Colab.
+Automatically converts YOLO bounding box annotations to instance segmentation masks using Meta's [Segment Anything Model (SAM)](https://github.com/facebookresearch/segment-anything).
 
 ## What it does
 
