@@ -81,7 +81,7 @@ Each label file follows standard YOLO format:
 
 ## Usage
 
-Open `auto_segment.ipynb` in Google Colab and run all cells, or configure the paths at the bottom:
+Open `auto_segment.ipynb` in Google Colab (or local machine) and run all cells, or configure the paths at the bottom:
 
 ```python
 IMAGES_DIR = "dataset/images"
