@@ -17,7 +17,7 @@ Takes a YOLO dataset with bounding box labels and outputs polygon-based segmenta
 
 This pipeline replicates what [Roboflow Auto Label](https://roboflow.com/annotate/auto-label) does as a paid cloud feature — completely free and on your own machine. Roboflow's Auto Label uses SAM under the hood: it accepts a bounding box as a spatial prompt, generates a segmentation mask, and exports the result as a polygon annotation. `auto_segment` follows the exact same approach.
 
-| Step | Roboflow Auto Label | `auto_segment` |
+| Step | Roboflow Auto Label | auto_segment |
 |---|---|---|
 | Input | Bounding box annotation | YOLO `.txt` bbox file |
 | Foundation model | SAM / Grounding DINO | SAM (`vit_b` or `vit_h`) |
@@ -92,15 +92,32 @@ MODEL_TYPE = "vit_b"  # "vit_b" (faster) or "vit_h" (best quality)
 main(IMAGES_DIR, LABELS_DIR, OUTPUT_DIR, MODEL_TYPE)
 ```
 
-Converted labels are saved to `OUTPUT_DIR`. For the first 3 images, a debug visualization is saved to `readme_images/<image_name>_debug.jpg` showing the original bounding boxes (green) and generated polygons (red).
+Converted labels are saved to `OUTPUT_DIR`. A debug visualization overlay is saved to `readme_images/<image_name>_debug.jpg` for the first `debug_first_n` images (default: 4), showing the original bounding boxes (green) and generated polygons (red).
 
 ## Examples
 
-Debug visualizations are saved for the first 3 images processed. Green = original bounding box, red = SAM-generated segmentation polygon. The targets are small plastic grasshopper. Note: there are also plastic crickets wich are green and similarly shaped, making them a good robustness test for the segmentation pipeline.
+Green = original bounding box prompt · Red = SAM-generated segmentation polygon
+
+### Out-of-domain test images
+
+These images were run through the pipeline without any retraining to verify that SAM generalises beyond the training dataset. Each is a completely different object category.
+
+| Weather vane | Wine bottle + lamp shade |
+|:---:|:---:|
+| ![image_1_debug](readme_images/image_1_debug.jpg) | ![image_2_debug](readme_images/image_2_debug.jpg) |
+
+| Seahorse figure | Woven baskets |
+|:---:|:---:|
+| ![image_3_debug](readme_images/image_3_debug.jpg) | ![image_4_debug](readme_images/image_4_debug.jpg) |
+
+### Training dataset (grasshoppers)
+
+The targets are small plastic grasshoppers. There are also plastic crickets which are green and similarly shaped, making them a good robustness test for the segmentation pipeline.
 
 ![img_315_debug](readme_images/img_315_debug.jpg)
 ![img_329_debug](readme_images/img_329_debug.jpg)
 ![img_473_debug](readme_images/img_473_debug.jpg)
+![img_301_debug](readme_images/img_301_debug.jpg)
 
 ## Output format
 
@@ -122,4 +139,4 @@ yolo segment train data=dataset.yaml model=yolov8s-seg.pt epochs=50
 
 - GPU (`cuda`) is used automatically when available; falls back to CPU.
 - Objects with masks smaller than 10 pixels or fewer than 3 contour points fall back to the original bounding box entry.
-- Polygon simplification tolerance defaults to `0.01` (1% of contour arc length); adjust `tolerance` in `mask_to_yolo_polygon` for more or fewer polygon points.
+- Polygon simplification tolerance defaults to `0.01` (1% of contour arc length); pass `tolerance=` to `main()` to adjust — lower values produce more polygon points and finer detail, higher values produce fewer points and a coarser outline.
